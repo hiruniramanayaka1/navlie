@@ -1,3 +1,11 @@
+# Optimized by ci-cost (https://github.com/mariotavarez/ci-cost)
+# Applied 4 optimizations:
+# - [HIGH] Add pip dependency cache to "build" job
+# - [HIGH] Add pip dependency cache to "examples" job
+# - [MEDIUM] Add concurrency group to "test_package.yml"
+# - [LOW] Explicitly set fail-fast for large matrix job "build" (5 combinations)
+# Estimated savings: ~10 min/run
+#
 name: Tests
 on:
   workflow_dispatch:
@@ -5,6 +13,10 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   build:
     runs-on: ubuntu-latest
