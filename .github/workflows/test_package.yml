@@ -18,6 +18,14 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{matrix.python-version}}
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('pyproject.toml') }}-${{ matrix.python-version }}
+        restore-keys: |
+          ${{ runner.os }}-pip-${{ matrix.python-version }}-
+          ${{ runner.os }}-pip-
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -27,22 +35,30 @@ jobs:
         pytest tests
 
   examples:
-        runs-on: ubuntu-latest
-        steps:
-        - uses: actions/checkout@v2
-        - name: Set up Python
-          uses: actions/setup-python@v2
-          with:
-            python-version: '3.12'
-        - name: Install dependencies
-          run: |
-            python -m pip install --upgrade pip
-            python -m pip install .
-        - name: Run examples
-          env:
-            MPLBACKEND: Agg
-          run: |
-            for f in examples/ex_*.py; do
-              echo "Running $f"
-              python "$f"
-            done
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.12'
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('pyproject.toml') }}-3.12
+        restore-keys: |
+          ${{ runner.os }}-pip-3.12-
+          ${{ runner.os }}-pip-
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install .
+    - name: Run examples
+      env:
+        MPLBACKEND: Agg
+      run: |
+        for f in examples/ex_*.py; do
+          echo "Running $f"
+          python "$f"
+        done
